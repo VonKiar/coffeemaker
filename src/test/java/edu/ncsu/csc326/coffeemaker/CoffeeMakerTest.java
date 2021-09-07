@@ -41,6 +41,10 @@ public class CoffeeMakerTest {
 	private Recipe recipe2;
 	private Recipe recipe3;
 	private Recipe recipe4;
+	private Recipe recipe5;
+	private Recipe recipe6;
+	private Recipe recipe7;
+	private Recipe recipe8;
 
 	/**
 	 * Initializes some recipes to test with and the {@link CoffeeMaker}
@@ -88,6 +92,42 @@ public class CoffeeMakerTest {
 		recipe4.setAmtMilk("1");
 		recipe4.setAmtSugar("1");
 		recipe4.setPrice("65");
+
+		//Set up for r5
+		recipe5 = new Recipe();
+		recipe5.setName("ChocoLATE");
+		recipe5.setAmtChocolate("100");
+		recipe5.setAmtCoffee("0");
+		recipe5.setAmtMilk("0");
+		recipe5.setAmtSugar("0");
+		recipe5.setPrice("100");
+
+		//Set up for r6
+		recipe6 = new Recipe();
+		recipe6.setName("CoffeeLATE");
+		recipe6.setAmtChocolate("0");
+		recipe6.setAmtCoffee("100");
+		recipe6.setAmtMilk("0");
+		recipe6.setAmtSugar("0");
+		recipe6.setPrice("100");
+
+		//Set up for r7
+		recipe7 = new Recipe();
+		recipe7.setName("MilkLATE");
+		recipe7.setAmtChocolate("0");
+		recipe7.setAmtCoffee("0");
+		recipe7.setAmtMilk("100");
+		recipe7.setAmtSugar("0");
+		recipe7.setPrice("100");
+
+		//Set up for r8
+		recipe8 = new Recipe();
+		recipe8.setName("SugarLATE");
+		recipe8.setAmtChocolate("0");
+		recipe8.setAmtCoffee("0");
+		recipe8.setAmtMilk("0");
+		recipe8.setAmtSugar("100");
+		recipe8.setPrice("100");
 	}
 
 
@@ -99,9 +139,68 @@ public class CoffeeMakerTest {
 	 * @throws InventoryException  if there was an error parsing the quanity
 	 * 		to a positive integer.
 	 */
-	@Test
+	@Test(expected = InventoryException.class)
 	public void testAddInventory() throws InventoryException {
 		coffeeMaker.addInventory("4","7","0","9");
+	}
+
+	@Test(expected = InventoryException.class)
+	public void testAddInventoryNegativeCoffee() throws InventoryException {
+		coffeeMaker.addInventory("-1", "1", "1", "1");
+	}
+
+	@Test(expected = InventoryException.class)
+	public void testAddInventoryNegativeMilk() throws InventoryException {
+		coffeeMaker.addInventory("1", "-1", "1", "1");
+	}
+
+	@Test(expected = InventoryException.class)
+	public void testAddInventoryNonIntegerMilk() throws InventoryException {
+		coffeeMaker.addInventory("1", "Aloha", "1", "1");
+	}
+
+	@Test(expected = InventoryException.class)
+	public void testAddInventoryNegativeSugar() throws InventoryException {
+		coffeeMaker.addInventory("1", "1", "-1", "1");
+	}
+
+	@Test(expected = InventoryException.class)
+	public void testAddInventoryPositiveSugar() throws InventoryException {
+		coffeeMaker.addInventory("1", "1", "1", "1");
+	}
+
+	@Test(expected = InventoryException.class)
+	public void testAddInventoryNonIntegerSugar() throws InventoryException {
+		coffeeMaker.addInventory("1", "1", "SAWASDEE", "1");
+	}
+
+	@Test(expected = InventoryException.class)
+	public void testAddInventoryNonIntegerCoffee() throws InventoryException {
+		coffeeMaker.addInventory("hola", "1", "1","1");
+	}
+
+	@Test
+	public void testAddInventoryNotEnoughChocolate() throws RecipeException {
+		coffeeMaker.addRecipe(recipe5);
+		assertEquals(100, coffeeMaker.makeCoffee(0, 100));
+	}
+
+	@Test
+	public void testAddInventoryNotEnoughCoffee() throws RecipeException {
+		coffeeMaker.addRecipe(recipe6);
+		assertEquals(100, coffeeMaker.makeCoffee(0, 100));
+	}
+
+	@Test
+	public void testAddInventoryNotEnoughMilk() throws RecipeException {
+		coffeeMaker.addRecipe(recipe7);
+		assertEquals(100, coffeeMaker.makeCoffee(0, 100));
+	}
+
+	@Test
+	public void testAddInventoryNotEnoughSugar() throws RecipeException {
+		coffeeMaker.addRecipe(recipe8);
+		assertEquals(100, coffeeMaker.makeCoffee(0, 100));
 	}
 
 	/**
@@ -115,7 +214,7 @@ public class CoffeeMakerTest {
 	 */
 	@Test(expected = InventoryException.class)
 	public void testAddInventoryException() throws InventoryException {
-		coffeeMaker.addInventory("4", "-1", "asdf", "3");
+		coffeeMaker.addInventory("4", "-1", "aaaa", "3");
 	}
 
 	/**
@@ -126,8 +225,15 @@ public class CoffeeMakerTest {
 	 */
 	@Test
 	public void testMakeCoffee() {
+		assertEquals(25, coffeeMaker.makeCoffee(0, 25));
 		coffeeMaker.addRecipe(recipe1);
 		assertEquals(25, coffeeMaker.makeCoffee(0, 75));
+		coffeeMaker.addRecipe(recipe2);
+		assertEquals(25, coffeeMaker.makeCoffee(0, 25));
+		coffeeMaker.addRecipe(recipe3);
+		assertEquals(0, coffeeMaker.makeCoffee(0, 100));
+		coffeeMaker.addRecipe(recipe4);
+		assertEquals(500, coffeeMaker.makeCoffee(0, 50));
 	}
 
 	/**
@@ -158,6 +264,8 @@ public class CoffeeMakerTest {
 	 */
 	@Test
 	public void testEditRecipe() throws RecipeException {
+		assertEquals(null, coffeeMaker.editRecipe(0, recipe2));
+
 		coffeeMaker.addRecipe(recipe1); // Initial object.
 
 		Recipe edited = new Recipe(); // Testing object for editing recipe.
@@ -174,6 +282,11 @@ public class CoffeeMakerTest {
 		assertEquals(coffeeMaker.getRecipes()[0], edited);
 	}
 
+	@Test(expected = InventoryException.class)
+	public void testAddChocolate() throws InventoryException {
+		coffeeMaker.addInventory("0", "0","0","ABC");
+	}
+
 	/**
 	 * Testing purchases of coffee, check changes.
 	 */
@@ -181,5 +294,6 @@ public class CoffeeMakerTest {
 	public void testPurchaseBeverage() {
 		coffeeMaker.addRecipe(recipe1);
 		assertEquals(50, coffeeMaker.makeCoffee(0, 100));
+		assertEquals("Coffee: 12\nMilk: 12\nSugar: 14\nChocolate: 15\n", coffeeMaker.checkInventory());
 	}
 }
